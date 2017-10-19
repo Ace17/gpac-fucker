@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+readonly tmpDir=/tmp/gpac-fucker-$$
+trap "rm -rf $tmpDir" EXIT
+mkdir -p $tmpDir
+
+function main
+{
+  fuck_gpac --disable-player
+  fuck_gpac --enable-static-bin
+  fuck_gpac --strip
+  fuck_gpac --disable-bifs
+  fuck_gpac --static-modules
+  fuck_gpac --disable-3d
+}
+
+function fuck_gpac
+{
+  echo "Fucking gpac build with: $@"
+  rm -rf $tmpDir/gpac
+  git clone -q --depth=1 https://github.com/gpac/gpac.git $tmpDir/gpac
+
+  pushd $tmpDir/gpac >/dev/null
+  export CCACHE_BASEDIR=$PWD
+  ./configure \
+    "$@" \
+    --cc="${CC-gcc}" --cxx="${CXX-g++}" >/dev/null 2>/dev/null # ccache, damn it!
+  if make -j`nproc` >/dev/null 2>/dev/null; then
+    echo pass
+  else
+    echo "*** FAIL ***"
+  fi
+  popd >/dev/null
+
+}
+
+main "$@"
+
